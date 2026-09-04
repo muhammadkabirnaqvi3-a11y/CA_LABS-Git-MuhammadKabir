@@ -1,0 +1,40 @@
+.text
+.globl main
+
+main:
+    li x3, 0x100    #a is stored in this memory
+    li x4, 0x200    #b is stored in this memory
+    li x5, 0x300    #c is stored in this memory
+
+    lb x10, 0(x3)
+    lh x11, 0(x4)
+    add x12, x10, x11
+    sw x12, 0(x5)
+
+    lb x10, 1(x3)
+    lh x11, 2(x4)
+    add x12, x10, x11
+    sw x12, 4(x5)
+
+    lb x10, 2(x3)
+    lh x11, 4(x4)
+    add x12, x10, x11
+    sw x12, 8(x5)
+
+    lb x10, 3(x3)
+    lh x11, 6(x4)
+    add x12, x10, x11
+    sw x12, 12(x5)
+
+end:
+    j end
+
+
+
+
+
+
+
+
+
+
