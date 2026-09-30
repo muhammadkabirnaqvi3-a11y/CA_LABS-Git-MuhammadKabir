@@ -1,0 +1,53 @@
+`timescale 1ns / 1ps
+
+module tb_top_fsm;
+
+    reg clk;
+    reg pbin;
+    reg [15:0] physical_sw;
+    wire [15:0] physical_leds;
+
+    // Instantiate the Unit Under Test (UUT)
+    top_fsm_system uut (
+        .clk(clk),
+        .pbin(pbin),
+        .physical_sw(physical_sw),
+        .physical_leds(physical_leds)
+    );
+
+    // 100 MHz clock generation (10 ns period)
+    always #5 clk = ~clk;
+
+    initial begin
+        // Initialize inputs
+        clk = 0;
+        pbin = 1;          // Assert reset initially
+        physical_sw = 16'd0;
+        #30;
+        
+        pbin = 0;          // Release reset (system stays in WAIT_INPUT since sw = 0)
+        #60;
+
+        // Test 1: Load switch value = 4 and verify countdown to 0
+        physical_sw = 16'd4;
+        #70;               // Wait for FSM to latch 4 and enter COUNTDOWN
+        
+        // Change switches during countdown to verify switch inputs are ignored
+        physical_sw = 16'd12;
+        #80;
+        physical_sw = 16'd0; // Set switches to 0 before countdown finishes
+        #250;              // Allow countdown 4 -> 3 -> 2 -> 1 -> 0 -> WAIT_INPUT
+
+        // Test 2: Load switch value = 10 and press reset mid-countdown
+        physical_sw = 16'd10;
+        #150;              // Let it count down for a few slow_clk ticks
+        physical_sw = 16'd0;
+        pbin = 1;          // Press reset button mid-countdown
+        #40;
+        pbin = 0;          // Release reset button
+        #100;
+
+        $finish;
+    end
+
+endmodule
