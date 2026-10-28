@@ -1,0 +1,36 @@
+`timescale 1ns / 1ps
+
+module ALUControl(
+    input [1:0] ALUOp,
+    input [2:0] funct3,
+    input [6:0] funct7,
+    output reg [3:0] ALUControl
+);
+
+    always @(*) begin
+        ALUControl = 4'b0000;
+        
+        case(ALUOp)
+            2'b00: ALUControl = 4'b0010; // Load/Store -> Add
+            2'b01: ALUControl = 4'b0110; // Branch -> Subtract
+            2'b11: ALUControl = 4'b0010; // I-Type (ADDI) -> Add
+            2'b10: begin                 // R-type instructions
+                case(funct3)
+                    3'b000: begin
+                        if (funct7[5] == 1'b1) 
+                            ALUControl = 4'b0110; // SUB
+                        else 
+                            ALUControl = 4'b0010; // ADD
+                    end
+                    3'b001: ALUControl = 4'b1000; // SLL
+                    3'b101: ALUControl = 4'b1001; // SRL
+                    3'b111: ALUControl = 4'b0000; // AND
+                    3'b110: ALUControl = 4'b0001; // OR
+                    3'b100: ALUControl = 4'b0011; // XOR
+                    default: ALUControl = 4'b0000;
+                endcase
+            end
+            default: ALUControl = 4'b0000;
+        endcase
+    end
+endmodule
